@@ -14,7 +14,7 @@ class Species(db.Model):
 
     __tablename__ = "species"
 
-    species_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    species_id = db.Column(db.String(50), primary_key=True)
     name = db.Column(db.String(50), nullable=False)
 
     def __repr__(self):
@@ -31,8 +31,8 @@ class Event(db.Model):
     event_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     animal_id = db.Column(db.Integer, db.ForeignKey('animals.animal_id'))
     timestamp = db.Column(db.DateTime, nullable=False)
-    x_location = db.Column(db.Float(3), nullable=False)
-    y_location = db.Column(db.Float(3), nullable=False)
+    long_location = db.Column(db.Float(3), nullable=False)
+    lat_location = db.Column(db.Float(3), nullable=False)
 
     def __repr__(self):
         """Provide helpful representation when printed."""
