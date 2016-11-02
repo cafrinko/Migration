@@ -3,9 +3,9 @@
 from sqlalchemy import func
 from model import Species, Event, Animal
 
-from model import connect_to_db, connect_to_db
+from model import connect_to_db, db
 from server import app
-import datetime
+from datetime import datetime
 
 
 def load_species():
@@ -25,6 +25,24 @@ def load_species():
 
     db.session.commit()
 
+def load_animals():
+    """Load animals from u.animal into database."""
+
+    print "animals"
+
+    Animal.query.delete()
+
+    for row in open('seed_data/u.animal'):
+        row = row.rstrip()
+        animal_id, species_id = row.split('|')
+
+        animal_id = int(animal_id)
+
+        animal = Animal(animal_id=animal_id, species_id=species_id)
+
+        db.session.add(animal)
+
+    db.session.commit()    
 
 def load_events():
     """Load events from u.event into database."""
@@ -38,11 +56,18 @@ def load_events():
     # Read u.event file and insert data
     for row in open("seed_data/u.event"):
         row = row.rstrip()
-        row = row.split('|')
-        row = row[1:]
-        timestamp, long_location, lat_location = row.split('|')
+        # row = row.split('|')
+        # row = row[1:]
 
-        event = Event(timestamp=timestamp,
+        animal_id, time, long_location, lat_location = row.split('|')
+
+        timestamp = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
+
+        long_location = float(long_location)
+        lat_location = float(lat_location)
+
+        event = Event(animal_id=animal_id,
+                      timestamp=timestamp,
                       long_location=long_location,
                       lat_location=lat_location)
 
@@ -51,30 +76,14 @@ def load_events():
     db.session.commit()
 
 
-def load_animals():
-    """Load animals from u.animal into database."""
-
-    print "animals"
-
-    Animals.query.delete()
-
-    for row in open('seed_data/u.animal'):
-        row = row.rstrip()
-        species_id, number = row.split('|')
-
-        animal = Animal(species_id=species_id, number=number)
-
-        db.session.add(animal)
-
-    db.session.commit()    
 
 
-if __name__ == "__main__"
+if __name__ == "__main__":
     connect_to_db(app)
 
     db.create_all()
 
     load_species()
-    load_events()
     load_animals()
+    load_events()
 

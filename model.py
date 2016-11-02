@@ -1,6 +1,7 @@
 """Models and database functions for Migration project."""
 
-from flask_sqlalchemy import flask_sqlalchemy
+from flask_sqlalchemy import SQLAlchemy
+# from flask.ext.sqlalchemy import SQLAlchemy
 
 #connection to postgresql database, where session object lives
 db = SQLAlchemy()
@@ -23,6 +24,22 @@ class Species(db.Model):
         s = "<Species species_id=%s name=%s>"
         return s % (self.species_id, self.name)
 
+class Animal(db.Model):
+    """Individual animal in tracked cohort."""
+
+    __tablename__ = "animals"
+
+    animal_id = db.Column(db.Integer, primary_key=True)
+    species_id = db.Column(db.String(50), db.ForeignKey('species.species_id'))
+
+    species = db.relationship('Species', backref="animal")
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""
+
+        s = "<Animal animal_id=%s species_id=%s event_id=%s number=%s>"
+        return s % (self.animal_id, self.species_id, self.event_id, self.number)
+
 class Event(db.Model):
     """Time and location recording of an animal."""
 
@@ -34,30 +51,14 @@ class Event(db.Model):
     long_location = db.Column(db.Float(3), nullable=False)
     lat_location = db.Column(db.Float(3), nullable=False)
 
+    animal = db.relationship('Animal', backref="animal")
+
     def __repr__(self):
         """Provide helpful representation when printed."""
 
         s = "<Event event_id=%s animal_id=%s timestamp_id=%s x_location=%s y_location=%s>"
         return s % (self.event_id, self.animal_id, self.timestamp, self.x_location, self.y_location)
 
-class Animal(db.Model):
-    """Individual animal in tracked cohort."""
-
-    __tablename__ = "animals"
-
-    animal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    species_id = db.Column(db.Integer, db.ForeignKey('species.species_id'))
-    event_id = db.Column(db.Integer, db.ForeignKey('events.event_id'))
-    number = db.Column(db.Integer, nullable=False)
-
-    species = db.relationship('Species', backref=db.backref("animal"))
-    event = db.relationship('Event', backref=db.backref("animal"))
-
-    def __repr__(self):
-        """Provide helpful representation when printed."""
-
-        s = "<Animal animal_id=%s species_id=%s event_id=%s number=%s>"
-        return s % (self.animal_id, self.species_id, self.event_id, self.number)
 
 ##########################################################################################3###########
 
