@@ -2,7 +2,8 @@
 
 from jinja2 import StrictUndefined
 
-from flask import (Flask, render_template, redirect, request, flash, session)
+from flask import (Flask, render_template, redirect, request, flash, session, jsonify)
+from stock_scraper import get_data
 from flask_debugtoolbar import DebugToolbarExtension
 
 from model import Species, Event, Animal, connect_to_db, connect_to_db
@@ -24,6 +25,22 @@ def make_session_permanent():
     """Keep a session open past when user closes browser aka session lasts forever."""
     
     session.permanent = True
+
+@app.route('/data.json')
+def get_data():
+    """Query database for data to plot in d3."""
+    events = db.session.query(Event.long_location, Event.lat_location).all()
+
+    coordinates = {}
+    i = 1
+    for event in events:
+        values = [event.long_location, even.lat_location]
+        coordinate = {}
+        coordinate[i] = values
+        coordinates[coordinate] = coordinate
+        i += 1
+
+    return jsonify(coordinates)
 
 @app.route('/')
 def index():
