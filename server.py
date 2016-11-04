@@ -3,10 +3,9 @@
 from jinja2 import StrictUndefined
 
 from flask import (Flask, render_template, redirect, request, flash, session, jsonify)
-from stock_scraper import get_data
 from flask_debugtoolbar import DebugToolbarExtension
 
-from model import Species, Event, Animal, connect_to_db, connect_to_db
+from model import db, connect_to_db, Species, Event, Animal
 
 app = Flask(__name__)
 
@@ -29,18 +28,26 @@ def make_session_permanent():
 @app.route('/data.json')
 def get_data():
     """Query database for data to plot in d3."""
-    events = db.session.query(Event.long_location, Event.lat_location).all()
+    # coordinates = { "type": "Point", "coordinates": [100.0, 0.0] 
 
-    coordinates = {}
-    i = 1
-    for event in events:
-        values = [event.long_location, even.lat_location]
-        coordinate = {}
-        coordinate[i] = values
-        coordinates[coordinate] = coordinate
-        i += 1
+    animal_ids = db.session.query(Animal.animal_id).all()
+    animal_pos_dict = { "animal": [] }
+    for animal_id in animal_ids:
+        animal_values = { "id": [], "positions": [] }
+        animal_values["id"].append(animal_id)
+        events = db.session.query(Event.long_location, Event.lat_location).filter(Event.animal_id==animal_id).all()
+        positions = { "type": "MultiPoint", "coordinates": []}
+        for event in events:
+            value1 = event.long_location
+            value2 = event.lat_location
+            values = [value1, value2]
+            positions["coordinates"].append(values)
+        animal_values["positions"].append(positions)
+        animal_pos_dict["animal"].append(animal_values)
+    # print type(events)
+    # animal_pos_dict = jsonify(animal_pos_dict)
+    return jsonify(animal_pos_dict)
 
-    return jsonify(coordinates)
 
 @app.route('/')
 def index():
@@ -64,7 +71,7 @@ if __name__ == "__main__":
 
     # At point that DebugToolbarExtension invoked, debug has to be set to true
 
-    app.debug = true
+    app.debug = True
 
     connect_to_db(app)
 
