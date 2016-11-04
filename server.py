@@ -44,8 +44,6 @@ def get_data():
             positions["coordinates"].append(values)
         animal_values["positions"].append(positions)
         animal_pos_dict["animal"].append(animal_values)
-    # print type(events)
-    # animal_pos_dict = jsonify(animal_pos_dict)
     return jsonify(animal_pos_dict)
 
 

@@ -3,79 +3,15 @@
 <head>
     <meta charset="utf-8">
     <title>Map</title>
-    <script   src="https://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA=" crossorigin="anonymous"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="migration/js/visual.js" type="text/javascript"></script>
 
-    <style type="text/css">
-        .feature {
-            fill: none;
-            stroke: grey;
-            stroke-width: 1px;
-            stroke-linejoin: round;
-        }
-        .mesh {
-            fill: none;
-                stroke: lightgrey;
-                stroke-width: 2px;
-                stroke-linejoin: round;
-        }
-        h1 {
-            font-family: sans-serif;
-        }
-    </style>
 </head>
 <body>
-    <h1>Point in northwest part of SF</h1>
 
-    <script type="text/javascript">
-
-        var width = 950,
-            height = 550;
-
-        // set projection
-        var projection = d3.geo.mercator();
-
-        // create path variable
-        var path = d3.geo.path()
-            .projection(projection);
-
-        d3.json("us.json", function(error, topo) { console.log(topo);
-
-            states = toppojson.feature(topo, topo.objects.states).features
-
-            // set projection parameters
-            projection
-            .scale(1000)
-            .center([-106, 37.5])
-
-            // create svg variable
-            var svg = d3.select("body").append("svg")
-                .attr("width", width)
-                .attr("height", height);
-
-            // points
-            aa = [-122.490402, 37.786453];
-        bb = [-122.389809, 37.72728];
-
-        console.log(projection(aa), projection(bb));
-
-        // add states from topojson
-        svg.selectAll("path")
-            .data(states).enter()
-            .append("path")
-            .attr("class", "feature")
-            .style("fill", "steelblue")
-            .attr("d", path);
-
-            // put border around states
-            svg.append("path")
-                .datum(topojson.mesh(topo, topo.objects.states, function(a, b) { return a !== b; }))
-                .attr("class", "mesh")
-                .attr("d", path)
-        })
-
-    </script>
+    <div id="chart"></div>
 
 </body>
 </html>
