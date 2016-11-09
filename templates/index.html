@@ -3,15 +3,22 @@
 <head>
     <meta charset="utf-8">
     <title>Map</title>
-    <script src="https://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA=" crossorigin="anonymous"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script src="http://d3js.org/topojson.v1.min.js"></script>
-    <script src="migration/js/visual.js" type="text/javascript"></script>
 
+    <style type="text/css">
+
+        #humpback-map {
+            height: 800px;
+        }
+
+    </style>
 </head>
 <body>
 
-    <div id="chart"></div>
+    <div id="humpback-map"></div>
 
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="/static/mapstyles.js"></script>
+    <script type="text/javascript" src="/static/maps.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqySXnsLHheWrWCuoouWUzaPbRamwGf24&callback=initMap" type="text/javascript"></script>
 </body>
 </html>

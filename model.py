@@ -10,6 +10,7 @@ db = SQLAlchemy()
 
 # Model definitions
 
+
 class Species(db.Model):
     """Species type among all tracked cohorts in this project."""
 
@@ -23,6 +24,7 @@ class Species(db.Model):
 
         s = "<Species species_id=%s name=%s>"
         return s % (self.species_id, self.name)
+
 
 class Animal(db.Model):
     """Individual animal in tracked cohort."""
@@ -39,6 +41,7 @@ class Animal(db.Model):
 
         s = "<Animal animal_id=%s species_id=%s event_id=%s number=%s>"
         return s % (self.animal_id, self.species_id, self.event_id, self.number)
+
 
 class Event(db.Model):
     """Time and location recording of an animal."""

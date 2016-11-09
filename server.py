@@ -22,29 +22,63 @@ app.jinja_env.undefined = StrictUndefined
 @app.before_request
 def make_session_permanent():
     """Keep a session open past when user closes browser aka session lasts forever."""
-    
+
     session.permanent = True
 
 @app.route('/data.json')
 def get_data():
     """Query database for data to plot in d3."""
-    # coordinates = { "type": "Point", "coordinates": [100.0, 0.0] 
+    # coordinates = { "type": "Point", "coordinates": [100.0, 0.0]
+
+    # humpbacks = {
+    #     humpback.animal_id: {
+    #         "id": humpback.animal_id,
+    #         "timestamp": humpback.timestamp,
+    #         "lng": humpback.long_location,
+    #         "lat": humpback.lat_location,
+    #     }
+    #     for humpback in db.session.query(Event).all()
+    # }
 
     animal_ids = db.session.query(Animal.animal_id).all()
-    animal_pos_dict = { "animal": [] }
+
+    animals = { "animals": [] }
+
     for animal_id in animal_ids:
-        animal_values = { "id": [], "positions": [] }
-        animal_values["id"].append(animal_id)
+        animal_values = { "animal": [] }
+        animal_values["animal"].append(animal_id)
         events = db.session.query(Event.long_location, Event.lat_location).filter(Event.animal_id==animal_id).all()
-        positions = { "type": "MultiPoint", "coordinates": []}
+        positions = []
+
         for event in events:
             value1 = event.long_location
             value2 = event.lat_location
             values = [value1, value2]
-            positions["coordinates"].append(values)
-        animal_values["positions"].append(positions)
-        animal_pos_dict["animal"].append(animal_values)
-    return jsonify(animal_pos_dict)
+            positions.append(values)
+
+        animal_values["positions"] = positions
+        animals["animals"].append(animal_values)
+
+    return jsonify(animals)
+
+    # animal_ids = db.session.query(Animal.animal_id).all()
+
+    # animal_pos_dict = {}
+
+    # for animal_id in animal_ids:
+    #     animal_pos_dict["animal_id"] = animal_id
+    #     events = db.session.query(Event.long_location, Event.lat_location).filter(Event.animal_id==animal_id).all()
+    #     coordinates = []
+
+    #     for event in events:
+    #         value1 = event.long_location
+    #         value2 = event.lat_location
+    #         values = [value1, value2]
+    #         coordinates.append(values)
+
+    #     animal_pos_dict["coordinates"] = coordinates
+
+    # return jsonify(animal_pos_dict)
 
 
 @app.route('/')
@@ -76,4 +110,4 @@ if __name__ == "__main__":
     # Use DebugToolbar
     DebugToolbarExtension(app)
 
-    app.run()
+    app.run(host="0.0.0.0")
