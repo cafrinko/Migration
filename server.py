@@ -5,7 +5,11 @@ from jinja2 import StrictUndefined
 from flask import (Flask, render_template, redirect, request, flash, session, jsonify)
 from flask_debugtoolbar import DebugToolbarExtension
 
+from sqlalchemy import and_, extract, cast, Date
+
 from model import db, connect_to_db, Species, Event, Animal
+
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -25,8 +29,8 @@ def make_session_permanent():
 
     session.permanent = True
 
-@app.route('/data.json')
-def get_data():
+@app.route('/animal_data.json')
+def get_animal_data():
     """Query database for data to plot in d3."""
     # coordinates = { "type": "Point", "coordinates": [100.0, 0.0]
 
@@ -79,6 +83,36 @@ def get_data():
     #     animal_pos_dict["coordinates"] = coordinates
 
     # return jsonify(animal_pos_dict)
+
+@app.route('/time_data.json')
+def get_time_data():
+
+    animal_ids = db.session.query(Animal.animal_id).first()
+    animal = animal_ids
+    
+    # start_time = datetime(2016, 05, 19)
+    # end_time = datetime(2016, 05, 20)
+    event_list = db.session.query(Event.timestamp).filter(Event.animal_id==animal).all()
+    # print timestamp
+    # datetime.datetime(2016, 11, 10, 16, 18, 56, 846206)
+    # print 'hey', timestamps
+
+    animal_positions = {}
+
+    # for animal_id in animal_ids:
+    date = event_list[0].timestamp
+    event = db.session.query(Event.long_location, 
+                             Event.lat_location).filter(date.month==extract('month', Event.timestamp),
+                                                        date.day==extract('day', Event.timestamp),
+                                                        Event.animal_id==animal).all()
+        
+    # if event:
+        # print "hi",type(animal)
+    animal_coordinate = [event[0].long_location, event[0].lat_location]
+
+    animal_positions[animal] = animal_positions.get(animal, animal_coordinate)
+
+    return jsonify(animal_positions)
 
 
 @app.route('/')
