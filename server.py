@@ -87,30 +87,56 @@ def get_animal_data():
 @app.route('/time_data.json')
 def get_time_data():
 
-    animal_ids = db.session.query(Animal.animal_id).first()
-    animal = animal_ids
+    #get all the animal ids
+    animal_ids = db.session.query(Animal.animal_id).all()
+    print animal_ids
     
-    # start_time = datetime(2016, 05, 19)
-    # end_time = datetime(2016, 05, 20)
-    event_list = db.session.query(Event.timestamp).filter(Event.animal_id==animal).all()
+    # animal_positions = {}
+    for animal_id in animal_ids:
+        animal = animal_id[0]
+        events = db.session.query(Event.timestamp).filter(Event.animal_id==animal).limit(500).all()
+
+        animal_positions = {}
+        # import pdb
+        # pdb.set_trace()
+        # date_list = []
+        for event in events:
+            month = event[0].month
+            day = event[0].day
+            year = event[0].year
+            date = str(month) + " " + str(day) + ", " + str(year)
+            #query database for animal coordinate at this date
+            coordinate = db.session.query(Event.long_location, Event.lat_location).filter(month==extract('month', Event.timestamp), day==extract('day', Event.timestamp), Event.animal_id==animal).first()
+            #put coordinate in its own list
+            animal_coordinate = [coordinate[0], coordinate[1]]
+            #break this into if else for clarity    
+            if date not in animal_positions:
+                animal_positions[date] = [animal, animal_coordinate]
+            else:
+                animal_positions[date].append([animal, animal_coordinate])
+            # event_dict[animal] = event_dict.get(animal, animal_coordinate)
+            # date_list.append(date)
+
+        # for date in date_list:
+        # animal_positions[str(date)] = animal_positions.get(date, event_dict)
+            #need to be able to append multiple animal coordinates to a date
+
+            # if event in animal:
+                # print "hi",type(animal)
+                #put the coordinates in an animal coordinates variable
     # print timestamp
     # datetime.datetime(2016, 11, 10, 16, 18, 56, 846206)
     # print 'hey', timestamps
 
-    animal_positions = {}
+    #make an empty dictionary
 
     # for animal_id in animal_ids:
-    date = event_list[0].timestamp
-    event = db.session.query(Event.long_location, 
-                             Event.lat_location).filter(date.month==extract('month', Event.timestamp),
-                                                        date.day==extract('day', Event.timestamp),
-                                                        Event.animal_id==animal).all()
+    #get the first event in the event list for an animal
+    #get the coordinates for that animal, only filtering by month and day, not smaller time units
         
-    # if event:
-        # print "hi",type(animal)
-    animal_coordinate = [event[0].long_location, event[0].lat_location]
 
-    animal_positions[animal] = animal_positions.get(animal, animal_coordinate)
+    #put the coordinates in the animal positions array for with the animal as the key 
+    #if the coordinate isn't already in the dictionary
 
     return jsonify(animal_positions)
 
