@@ -5,13 +5,13 @@ from jinja2 import StrictUndefined
 from flask import (Flask, render_template, redirect, request, flash, session, jsonify)
 from flask_debugtoolbar import DebugToolbarExtension
 
-from sqlalchemy import and_, extract, cast, Date
+from sqlalchemy import extract, cast, Date
 
 from model import db, connect_to_db, Species, Event, Animal
 
 from datetime import datetime
 
-from itertools import chain
+from collections import defaultdict
 
 app = Flask(__name__)
 
@@ -123,46 +123,90 @@ def get_time_data():
 
     #get all events
 
-    events = db.session.query(Event.timestamp).filter(extract('year', Event.timestamp)==2016, extract('month', Event.timestamp)==04, extract('day', Event.timestamp)==30).all()
+    events = db.session.query(Event.timestamp).filter(extract('year', Event.timestamp)==2016,
+                                                      extract('month', Event.timestamp)==04,
+                                                      extract('day', Event.timestamp)==30).all()
 
-    # import pdb
-    # pdb.set_trace()
-
-    animal_positions = {}
+    # animal_positions = {}
     #for each day get all distinct animals
     for event in events:
         month = event[0].month
         day = event[0].day
         year = event[0].year
         date = str(month) + "/" + str(day) + "/" + str(year)
-        animal_ids = db.session.query(Event.animal_id).filter(month==extract('month', Event.timestamp), day==extract('day', Event.timestamp)).distinct()
+        animal_ids = db.session.query(Event.animal_id).filter(year==extract('year', Event.timestamp),
+                                                              month==extract('month', Event.timestamp),
+                                                              day==extract('day', Event.timestamp)).distinct().all()
         
+        # print animal_ids
+
+        # import pdb
+        # pdb.set_trace()
         coordinates = {}
         #for each event's distinct animal get first coordinate
         for animal_id in animal_ids:
             animal = animal_id[0]
-            coordinate = db.session.query(Event.long_location, Event.lat_location).filter(month==extract('month', Event.timestamp), day==extract('day', Event.timestamp), Event.animal_id==animal).first()
-            animal_coordinate = [coordinate[0], coordinate[1]]
-            # if animal not in coordinates:
-            coordinates[animal] = [animal_coordinate]
-            # else:
-                # coordinates
+            lat_long = db.session.query(Event.long_location, Event.lat_location).filter(year==extract('year', Event.timestamp),
+                                                                                        month==extract('month', Event.timestamp),
+                                                                                        day==extract('day', Event.timestamp),
+                                                                                        Event.animal_id==animal).all()
+            coord_pair = [lat_long[0], lat_long[1]]
+            if animal not in coordinates:
+                coordinates[animal] = coord_pair
+            else:
+                coordinates[animal].append(coord_pair)
 
-        date_string = str(date)
+    return jsonify(coordinates)
 
-        coordinates_update = {}
-        for coordinate in coordinates:
-            coordinates_update.update(coordinate)
+        # date_string = str(date)
+
+        # coordinates_update = {}
+        # for coordinate in coordinates:
+        #     coordinates_update.update(coordinate)
         # coordinates = dict(chain(coordinates))
         # coordinate_set = set(coordinates)
 
         # coordinates = dict(coordinate_set)
 
-        import pdb
-        pdb.set_trace()
+        # import pdb
+        # pdb.set_trace()
 
+        # animal_update = {}
         # if date_string not in animal_positions:
-        animal_positions[date_string] = coordinates_update
+        #     animal_positions[date_string] = [coordinates]
+        # else:
+            # make a set of previous and current coordinates
+            # animal_positions[date_string].append(coordinates)
+
+    # map(dict, set(map(lambda animal_po: tuple(x.items()), animal_positions)))
+
+            # old_keys = animal_positions[date_string].keys()
+            # new_keys = coordinates.keys()
+            # list(set().union(old_keys, new_keys))
+            # key = date_string
+            # value = animal_positions[date_string]
+            # set(animal_positions[date_string])
+            
+        # temp_dict = defaultdict(set)
+        # for item in animal_positions[date_string]:
+        #     for key, value in item.items():
+        #         temp_dict[key].add()
+            # import pdb
+            # pdb.set_trace()
+            # for item in animal_positions[date_string]:
+            #     animal_update.update(item)
+            #     for key, value in item.iteritems():
+            #         animal_defaultdict[key].add[value]
+
+        # for coordinate in animal_positions[date_string]:
+        #     for key, value in coordinate.iteritems():
+        #         coordinate[key].add[value]
+
+        # animal_positions = defaultdict(set)
+
+        # for animal_position in animal_positions:
+        #     for key, value in animal_position.iteritems():
+        #         animal
         # else:
         #     animal_positions[date_string].append(coordinates)
             # if event in animal:
@@ -181,8 +225,9 @@ def get_time_data():
 
     #put the coordinates in the animal positions array for with the animal as the key 
     #if the coordinate isn't already in the dictionary
+    # import pdb
+    # pdb.set_trace()
 
-    return jsonify(animal_positions)
 
 
 @app.route('/')
