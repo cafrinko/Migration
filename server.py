@@ -149,14 +149,15 @@ def get_time_data():
             lat_long = db.session.query(Event.long_location, Event.lat_location).filter(year==extract('year', Event.timestamp),
                                                                                         month==extract('month', Event.timestamp),
                                                                                         day==extract('day', Event.timestamp),
-                                                                                        Event.animal_id==animal).all()
+                                                                                        Event.animal_id==animal).first()
             coord_pair = [lat_long[0], lat_long[1]]
+
             if animal not in coordinates:
                 coordinates[animal] = coord_pair
             else:
                 coordinates[animal].append(coord_pair)
 
-    return jsonify(coordinates)
+    return jsonify({"coordinates": coordinates.values()})
 
         # date_string = str(date)
 

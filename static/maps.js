@@ -1,8 +1,9 @@
 var map;
+var results = null;
 
 function initMap() {
 
-    var myLatLng = {lat: -67.322, lng: -66.303};
+    var myLatLng = {lat: -62.594, lng: -64.607};
 
     map = new google.maps.Map(document.getElementById('humpback-map'), {
         center: myLatLng,
@@ -12,11 +13,14 @@ function initMap() {
         panControl: false,
         streetViewControl: false,
         styles: MAPSTYLES,
-        mapTypeId: google.maps.MapTypeId.TERRAIN
+        mapTypeId: 'satellite'
+        // google.maps.MapTypeId.TERRAIN
     });
 
-    $.get('/time_data.json', function (times) {
 
+    $.get('/time_data.json', function (results) {
+
+        console.log(results);
         // var positions, path;
         // var animals = animals.animals;
         // var colors = ["#FFFFFF", "#C0C0C0", "#808080", "#FF0000", "#F0A804", "#FFFF00", "#008000", "#0000FF", "#800080"];
@@ -47,14 +51,19 @@ function initMap() {
         // }
 
         var heatmap;
-        var positions = animal_positions;
-
-        coords = [];
+        var coordinates = results.coordinates;
+        // console.log(coordinates);
         function getPoints() {
-            for (var i=0; i<positions.length; i++) {
+            coords = [];
+            // console.log(coordinates.length);
+            for (var i=0; i<coordinates.length; i++) {
+                console.log(i);
             // animal = animals[key];
-                return coords.push(positions[i]);
-
+                var point = new google.maps.LatLng(coordinates[i][0], coordinates[i][1]);
+                console.log(point);
+                coords.push(point);
+            // console.log(coords);
+            
                 // for (var j=0; j<positions.length; j++) {
                 //     // debugger;
                 //     // console.log(positions[j]);
@@ -65,12 +74,22 @@ function initMap() {
                 // }
 
             }
+            return coords;
         }
 
+
+
+        var get_points_results = getPoints();
+        console.log("getPoints has been called");
+        console.log(get_points_results);
+        // console.log(getPoints());
+        
         heatmap = new google.maps.visualization.HeatmapLayer({
-            data: getPoints(),
+            data: get_points_results,
             map: map
         });
+
+        heatmap.setMap(map);
 
         // function changeGradient() {
         //     var gradient = [
