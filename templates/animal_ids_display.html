@@ -1,0 +1,15 @@
+<!DOCTYPE>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+<ul>
+{% for animal_id in animal_ids %}
+    <li><a href="/animal_id/{{ animal_id[0] }}">{{ animal_id[0] }}</a></li>
+{% endfor %}
+</ul>
+
+</body>
+</html>

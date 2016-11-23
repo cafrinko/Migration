@@ -1,0 +1,19 @@
+<!DOCTYPE>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+Animal ID: {{ animal_id }} <br><br>
+
+Number of positions recorded: {{ num_events }} <br><br>
+
+<ul>
+    Positions and Times Recorded:
+    {% for lat, long, timestamp in coordinates %}
+        <li>({{ lat }} {{ long }}), {{ timestamp.year }}-{{ timestamp.month }}-{{ timestamp.day }}</li>
+    {% endfor %}
+</ul>
+
+</body>
+</html>

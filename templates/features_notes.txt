@@ -1,0 +1,3 @@
+create a whale theme
+
+chart.js for numbers of tracked events

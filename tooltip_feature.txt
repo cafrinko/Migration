@@ -1,0 +1,5 @@
+Make pg that lists all whales by id that are links to click to more info about the whale
+
+Instead of clicking a link, make so I can click a polyline to get info
+
+Transfer to tooltips
