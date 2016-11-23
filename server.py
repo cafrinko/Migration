@@ -24,12 +24,54 @@ app.secret_key = "ABC"
 
 app.jinja_env.undefined = StrictUndefined
 
-
 @app.before_request
 def make_session_permanent():
     """Keep a session open past when user closes browser aka session lasts forever."""
 
     session.permanent = True
+
+# @app.route('/markermap-form', methods=["POST"])
+# def markermap_form_submit():
+#     """Submit markermap form."""
+
+#     years = request.form.getlist("year")
+#     months = request.form.getlist("month")
+
+#     return redirect('/time_data.json', years=years, months=months)
+
+@app.route('/')
+def animals_menu_display():
+    """Displays whale id's in a dropdown menu."""
+
+    animal_ids = db.session.query(Animal.animal_id).all()
+
+    return render_template("index.html", animal_ids=animal_ids)
+
+@app.route('/animals_info')
+def animals_info_display():
+    """Displays whale id's that are links for more info about each whale."""
+
+    animal_ids = db.session.query(Animal.animal_id).all()
+
+    return render_template("animal_ids_display.html", animal_ids=animal_ids)
+
+# @app.route('/animal_path/<animal_id>')
+# def 
+
+
+@app.route('/animal_id/<animal_id>')
+def ind_animal_info(animal_id):
+    """Displays individual animal info."""
+
+    num_events = db.session.query(Event.timestamp).filter(Event.animal_id==animal_id).count()
+
+    coordinates = db.session.query(Event.long_location, Event.lat_location, Event.timestamp).filter(Event.animal_id==animal_id).all()
+
+    # timestamps = db.session.query(Event.timestamp).filter(Event.animal_id==animal_id).all()
+
+    return render_template("ind_animal_info.html", 
+                            animal_id=str(animal_id), 
+                            num_events=str(int(num_events)), coordinates=coordinates)
 
 @app.route('/animal_data.json')
 def get_animal_data():
@@ -121,11 +163,13 @@ def get_time_data():
         # coordinates["coordinates"] = animal_positions
             #need to be able to append multiple animal coordinates to a date
 
-    #get all events
+    year = int(request.args.get("year"))
+    month = int(request.args.get("month"))
+    day = int(request.args.get("day"))
 
-    events = db.session.query(Event.timestamp).filter(extract('year', Event.timestamp)==2016,
-                                                      extract('month', Event.timestamp)==04,
-                                                      extract('day', Event.timestamp)==30).all()
+    events = db.session.query(Event.timestamp).filter(extract('year', Event.timestamp)==year,
+                                                      extract('month', Event.timestamp)==month,
+                                                      extract('day', Event.timestamp)==day).all()
 
     # animal_positions = {}
     #for each day get all distinct animals
@@ -158,6 +202,52 @@ def get_time_data():
                 coordinates[animal].append(coord_pair)
 
     return jsonify({"coordinates": coordinates.values()})
+
+
+##Querying by user inputted animal##
+    #get all events filtering by year and month
+
+    # year = request.form.get("year")
+    # month = request.form.get("month")
+
+    # events = db.session.query(Event.timestamp).filter(extract('year', Event.timestamp)==year,
+    #                                                   extract('month', Event.timestamp)==month).all()
+
+    # # import pdb
+    # # pdb.set_trace()
+                                                
+    # # animal_positions = {}
+    # #for each month get all distinct animals
+    # for event in events:
+    #     month = event[0].month
+    #     # day = event[0].day
+    #     year = event[0].year
+    #     date = str(month) + "/" + str(day) + "/" + str(year)
+    #     animal_ids = db.session.query(Event.animal_id).filter(year==extract('year', Event.timestamp),
+    #                                                           month==extract('month', Event.timestamp)).distinct().all()
+        
+    #     # print animal_ids
+
+    #     # for each event's distinct animal get all coordinates
+    #     for animal_id in animal_ids:
+    #         animal = animal_id[0]
+    #         lat_longs = db.session.query(Event.long_location, Event.lat_location).filter(year==extract('year', Event.timestamp),
+    #                                                                                     month==extract('month', Event.timestamp),
+    #                                                                                     Event.animal_id==animal).all()
+            
+            
+    #         coordinates = {}
+    #         for lat_long in lat_longs:
+    #             coord_pair = [lat_long[0], lat_long[1]]
+
+    #             if animal not in coordinates:
+    #                 coordinates[animal] = coord_pair
+    #             else:
+    #                 coordinates[animal].append(coord_pair)
+
+    # return jsonify({"coordinates": coordinates.values()})
+##Querying by user inputted animal##
+
 
         # date_string = str(date)
 
